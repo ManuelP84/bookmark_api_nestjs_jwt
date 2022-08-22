@@ -15,10 +15,10 @@ export class AuthService {
   ) {}
 
   async signup(authDto: AuthDto) {
+    // Generate the password hash
+    const hash = await argon.hash(authDto.password);
+    //Save the new user into the db
     try {
-      // Generate the password hash
-      const hash = await argon.hash(authDto.password);
-      //Save the new user into the db
       const user = await this.prismaService.user.create({
         data: {
           email: authDto.email,
@@ -27,10 +27,13 @@ export class AuthService {
       });
 
       // Delete the hash from the return
-      delete user.hash;
+      //delete user.hash;
 
       //Return the new user
-      return user;
+      //return user;
+
+      //Return access token
+      return this.signinToken(user.id, user.email);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -64,14 +67,17 @@ export class AuthService {
     return this.signinToken(user.id, user.email);
   }
 
-  async signinToken(userId: number, email: string): Promise<{ access_token:string }> {
+  async signinToken(
+    userId: number,
+    email: string,
+  ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
       email,
     };
     const secret = this.config.get('JWT_SECRET_KEY');
 
-    const token =  await this.jwt.signAsync(payload, {
+    const token = await this.jwt.signAsync(payload, {
       expiresIn: '15m',
       secret,
     });
