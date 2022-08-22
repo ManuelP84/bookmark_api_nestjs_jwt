@@ -2,22 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
-@Injectable()   // If we need to inject we add this decorator
+@Injectable() // If we need to inject we add this decorator
 export class PrismaService extends PrismaClient {
-    constructor(config: ConfigService){
-        super({
-            datasources:{
-                db: {
-                    url: config.get('DATABASE_URL')
-                }
-            }
-        });
-    }
+  constructor(config: ConfigService) {
+    super({
+      datasources: {
+        db: {
+          url: config.get('DATABASE_URL'),
+        },
+      },
+    });
+  }
 
-    cleanDb(){
-        return this.$transaction([
-            this.bookmark.deleteMany(),
-            this.user.deleteMany(),
-        ]);
-    }
+  cleanDb() {
+    return this.$transaction([
+      this.bookmark.deleteMany(),
+      this.user.deleteMany(),
+    ]);
+  }
 }
